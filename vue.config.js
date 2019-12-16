@@ -5,7 +5,22 @@ function resolve (dir) {
   return path.join(__dirname, dir)
 }
 
+const SkeletonWebpackPlugin = require('vue-skeleton-webpack-plugin')
+
 module.exports = {
+  configureWebpack: {
+    plugins: [
+      new SkeletonWebpackPlugin({
+        webpackConfig: {
+          entry: {
+            app: path.join(__dirname, './src/skeleton.js')
+          }
+        },
+        minimize: true,
+        quiet: true
+      })
+    ]
+  },
   chainWebpack: config => {
     config.resolve.alias
       .set('@', resolve('src'))
@@ -30,6 +45,7 @@ module.exports = {
   },
   css: {
     loaderOptions: {
+      // extract: true,
       stylus: {
         'resolve url': true,
         'import': [
