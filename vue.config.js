@@ -26,6 +26,7 @@ module.exports = {
       .set('@', resolve('src'))
       .set('@common', resolve('src/common'))
       .set('@components', resolve('src/components'))
+      .set('@api', resolve('src/api'))
   },
   devServer: {
     proxy: {

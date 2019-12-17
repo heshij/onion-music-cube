@@ -1,7 +1,11 @@
-import axios from 'axios'
+/**
+ * api接口的统一出口
+ */
 
-export function getSlider () {
-  return axios.get('api/banner?type=1').then((res) => {
-    return Promise.resolve(res)
-  })
+// 登录模块接口
+import login from '@/api/login'
+
+// 导出接口
+export default {
+  login
 }
