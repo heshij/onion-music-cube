@@ -1,18 +1,18 @@
 <template>
-    <div class="cloud-wrap">
-      <p>this is cloud page</p>
+    <div class="video-wrap">
+      <p>this is video page</p>
     </div>
 </template>
 
 <script>
   export default {
-    name: 'cloud'
+    name: 'm-video'
   }
 </script>
 
 <style scoped lang="stylus">
   @import "~@common/stylus/mixin"
   @import "~@common/stylus/variable"
-  .cloud-wrap
+  .video-wrap
     padding-top 40px
 </style>

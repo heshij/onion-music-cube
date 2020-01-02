@@ -2,12 +2,12 @@
   <div class="header">
     <span class="icon-menu" @click="showSidebar"></span>
     <ul class="menu">
-      <li><router-link to="home">我的</router-link></li>
-      <li><router-link to="find">发现</router-link></li>
-      <li><router-link to="cloud">云村</router-link></li>
-      <li><router-link to="video">视频</router-link></li>
+      <li><router-link to="/home">我的</router-link></li>
+      <li><router-link to="/find">发现</router-link></li>
+      <li><router-link to="/cloud">云村</router-link></li>
+      <li><router-link to="/m-video">视频</router-link></li>
     </ul>
-    <span class="icon-search"></span>
+    <router-link tag="span" class="icon-search" to="/search"></router-link>
   </div>
 </template>
 

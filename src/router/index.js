@@ -3,7 +3,7 @@ import VueRouter from 'vue-router'
 import Home from '@components/home/home'
 import Find from '@components/find/find'
 import Cloud from '@components/cloud/cloud'
-import Video from '@components/video/video'
+import MVideo from '@components/m-video/m-video'
 Vue.use(VueRouter)
 
 const routes = [
@@ -27,9 +27,9 @@ const routes = [
     component: Cloud
   },
   {
-    path: '/video',
-    name: 'video',
-    component: Video
+    path: '/m-video',
+    name: 'm-video',
+    component: MVideo
   }
 ]
 

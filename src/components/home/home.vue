@@ -1,9 +1,6 @@
 <template>
   <div class="home-wrap">
-    <p>这是home页面</p>
-    <p>这是home页面</p>
-    <p>这是home页面</p>
-    <p>这是home页面</p>
+    <p>this is home page</p>
   </div>
 </template>
 
@@ -20,4 +17,6 @@
 <style scoped lang="stylus">
   @import "~@common/stylus/mixin"
   @import "~@common/stylus/variable"
+  .home-wrap
+    padding-top 40px
 </style>
