@@ -1,6 +1,9 @@
 <template>
   <div class="home-wrap">
-    网易云首页
+    <p>这是home页面</p>
+    <p>这是home页面</p>
+    <p>这是home页面</p>
+    <p>这是home页面</p>
   </div>
 </template>
 
@@ -8,18 +11,13 @@
   export default {
     name: 'home',
     created () {
-      this._phoneLoginFn()
     },
     methods: {
-      _phoneLoginFn () {
-        this.$api.login.phoneLoginFn('13025250075', '19234023hj').then(res => {
-          console.log(res.data)
-        })
-      }
     }
   }
 </script>
 
-<style scoped>
-
+<style scoped lang="stylus">
+  @import "~@common/stylus/mixin"
+  @import "~@common/stylus/variable"
 </style>
