@@ -15,6 +15,9 @@
       <router-link to="/" tag="span">歌单广场</router-link>
     </div>
     <song-card :songList="songList" @select="goSongListDetail"></song-card>
+    <div v-show="!songList.length" class="loading-container">
+      <loading></loading>
+    </div>
   </div>
 </template>
 
@@ -22,10 +25,11 @@
   import { getRandomArr } from '@common/js/utils'
   import { ERR_OK } from '../../api/config'
   import SongCard from '../../base/song-card/song-card'
+  import Loading from '../../base/loading/loading'
 
   export default {
     name: 'find',
-    components: { SongCard },
+    components: { Loading, SongCard },
     data () {
       return {
         sliders: [],
@@ -49,7 +53,7 @@
         try {
           const { data } = await this.$api.find.getRecSongList()
           if (data.code === ERR_OK) {
-            this.songList = getRandomArr(data.playlists, 6)
+            this.songList = getRandomArr(data.playlists, 30)
             console.log('songList:', this.songList)
           }
         } catch (error) {
@@ -151,7 +155,16 @@
       padding 0 10px
       border-1px(#ccc, 12px, solid)
 
-  .song-card-wrap {
-    margin-top: 14px;
-  }
+  .song-card-wrap
+    margin-top 14px
+  .loading-container
+    position absolute
+    width: 22%
+    top 50%
+    left 50%
+    margin-left -11%
+    transform translateY(-50%)
+    background-color $color-theme
+    padding 6px 0
+    border-radius 4px
 </style>

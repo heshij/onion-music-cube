@@ -5,6 +5,7 @@ import Find from '@components/find/find'
 import Cloud from '@components/cloud/cloud'
 import MVideo from '@components/m-video/m-video'
 import SongLists from '@components/song-lists/song-lists'
+import Disc from '@components/disc/disc'
 Vue.use(VueRouter)
 
 const routes = [
@@ -33,9 +34,15 @@ const routes = [
     component: MVideo
   },
   {
-    path: '/song-lists/:id',
+    path: '/song-lists',
     name: 'song-lists',
-    component: SongLists
+    component: SongLists,
+    children: [
+      {
+        path: ':id',
+        component: Disc
+      }
+    ]
   }
 ]
 
