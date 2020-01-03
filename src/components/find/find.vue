@@ -10,25 +10,60 @@
         </cube-slide-item>
       </cube-slide>
     </div>
+    <div class="song-card-title">
+      <h2 class="_h2">推荐歌单</h2>
+      <router-link to="/" tag="span">歌单广场</router-link>
+    </div>
+    <song-card :songList="songList" @select="goSongListDetail"></song-card>
   </div>
 </template>
 
 <script>
+  import { getRandomArr } from '@common/js/utils'
+  import { ERR_OK } from '../../api/config'
+  import SongCard from '../../base/song-card/song-card'
+
   export default {
     name: 'find',
-    data() {
+    components: { SongCard },
+    data () {
       return {
-        sliders: []
+        sliders: [],
+        songList: []
       }
     },
-    created() {
+    created () {
+      // 获取banner
       this._getSlider()
+      // 获取推荐歌单
+      this._getRecSongList()
     },
     methods: {
-      _getSlider() {
+      _getSlider () {
         this.$api.find.getSlider().then((res) => {
           this.sliders = res.data.banners
-          console.log(this.sliders)
+          // console.log('sliders: ', this.sliders)
+        })
+      },
+      async _getRecSongList () {
+        try {
+          const { data } = await this.$api.find.getRecSongList()
+          if (data.code === ERR_OK) {
+            this.songList = getRandomArr(data.playlists, 6)
+            console.log('songList:', this.songList)
+          }
+        } catch (error) {
+          const toast = this.$createToast({
+            time: 2000,
+            txt: '请求超时'
+          })
+          toast.show()
+          console.log(error)
+        }
+      },
+      goSongListDetail (songList) {
+        this.$router.push({
+          path: `/song-lists/${songList.id}`
         })
       }
     }
@@ -39,7 +74,7 @@
   @import "~@common/stylus/mixin"
   @import "~@common/stylus/variable"
   .find-wrap
-    padding-top 40px
+    padding-top 50px
 
   .slide-container
     width 345px
@@ -88,7 +123,35 @@
       height 8px
       border-radius 50%
       margin 0 2px
+      background-color $color-white-o
 
       &.active
         background-color: $color-theme!important
+
+  .song-card-title
+    display flex
+    justify-content space-between
+    flex-wrap nowrap
+    padding 0 15px
+    margin-top 14px
+
+    ._h2
+      font-size $font-size-medium-x
+      color $color-title-d
+      font-weight bold
+      line-height 24px
+
+    span
+      display block
+      height 24px
+      line-height 24px
+      text-align center
+      font-size $font-size-small-s
+      color $color-title-d
+      padding 0 10px
+      border-1px(#ccc, 12px, solid)
+
+  .song-card-wrap {
+    margin-top: 14px;
+  }
 </style>

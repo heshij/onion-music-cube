@@ -4,6 +4,7 @@ import Home from '@components/home/home'
 import Find from '@components/find/find'
 import Cloud from '@components/cloud/cloud'
 import MVideo from '@components/m-video/m-video'
+import SongLists from '@components/song-lists/song-lists'
 Vue.use(VueRouter)
 
 const routes = [
@@ -30,6 +31,11 @@ const routes = [
     path: '/m-video',
     name: 'm-video',
     component: MVideo
+  },
+  {
+    path: '/song-lists/:id',
+    name: 'song-lists',
+    component: SongLists
   }
 ]
 

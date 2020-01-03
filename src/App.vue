@@ -1,7 +1,9 @@
 <template>
   <div id="app">
     <m-header @showSidebar="show"></m-header>
-    <router-view/>
+    <keep-alive>
+      <router-view></router-view>
+    </keep-alive>
   </div>
 </template>
 
