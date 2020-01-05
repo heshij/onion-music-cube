@@ -12,7 +12,7 @@
     </div>
     <div class="song-card-title">
       <h2 class="_h2">推荐歌单</h2>
-      <router-link to="/" tag="span">歌单广场</router-link>
+      <router-link to="/song-lists" tag="span">歌单广场</router-link>
     </div>
     <song-card :songList="songList" @select="goSongListDetail"></song-card>
     <div v-show="!songList.length" class="loading-container">
@@ -53,7 +53,7 @@
         try {
           const { data } = await this.$api.find.getRecSongList()
           if (data.code === ERR_OK) {
-            this.songList = getRandomArr(data.playlists, 30)
+            this.songList = getRandomArr(data.playlists, 6)
             console.log('songList:', this.songList)
           }
         } catch (error) {

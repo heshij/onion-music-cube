@@ -1,7 +1,7 @@
 <template>
   <div class="song-card-wrap" v-show="songList.length">
     <ul>
-      <li @click="selectItem(item)" v-for="item in songList" :key="item.id">
+      <li @click="selectItem(item)" v-for="(item,index) in songList" :key="index">
         <div class="img-wrap"><img alt="" v-lazy="item.coverImgUrl" :key="item.id"></div>
         <div class="desc">{{item.name}}</div>
         <span class="icon-play">&nbsp;{{item.playCount | setPlayCount}}</span>
@@ -16,13 +16,13 @@
     props: {
       songList: {
         type: Array,
-        default () {
+        default() {
           return []
         }
       }
     },
     filters: {
-      setPlayCount (val) {
+      setPlayCount(val) {
         if (!val) {
           return ''
         }
@@ -35,7 +35,7 @@
       }
     },
     methods: {
-      selectItem (item) {
+      selectItem(item) {
         this.$emit('select', item)
       }
     }
@@ -47,15 +47,16 @@
   @import "~@common/stylus/variable"
   .song-card-wrap
     overflow: hidden
-
     ul
       display flex
       justify-content space-between
       flex-wrap wrap
       padding: 0 15px;
+
       li
         position relative
         margin-bottom 6px
+
         .img-wrap
           position relative
           width 110px
@@ -87,6 +88,7 @@
           overflow hidden
           line-height 18px
           margin-top: 4px
+
         span
           position absolute
           top: 4px
