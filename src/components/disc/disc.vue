@@ -58,6 +58,7 @@
               </ul>
             </div>
           </div>
+          <div class="desc-bg" :style="bgStyle"></div>
           <cube-sticky-ele ele-key="2">
             <div class="sticky-header">
               <div class="left">
@@ -96,25 +97,32 @@
 <script>
   import { ERR_OK } from '../../api/config'
   import Loading from '../../base/loading/loading'
+  import analyze from 'rgbaster'
 
   export default {
     name: 'disc',
     components: { Loading },
-    data () {
+    data() {
       return {
         songs: [],
         playlist: {},
         subscribedCount: 0, // 订阅数
         creator: {}, // 作者信息
         scrollOptions: {
+          probeType: 3
           // bounce: false
         },
         scrollEvents: ['scroll'],
         scrollY: 0
       }
     },
+    computed: {
+      bgStyle() {
+        return `background-image:url(${this.playlist.coverImgUrl})`
+      }
+    },
     filters: {
-      setNum (val) {
+      setNum(val) {
         if (!val) {
           return ''
         }
@@ -126,11 +134,11 @@
         return val
       }
     },
-    created () {
+    created() {
       this._getInfo()
     },
     methods: {
-      _getInfo () {
+      _getInfo() {
         let listsId = this.$route.params.id
         this.$api.find.getSongListsDetail(listsId).then((res) => {
           if (res.data.code === ERR_OK) {
@@ -142,13 +150,18 @@
           console.log('songs:', this.songs)
           console.log('playlist:', res.data.playlist)
           console.log('creator:', res.data.playlist.creator)
+          this.getBgColor()
         })
       },
-      scrollHandler ({ y }) {
+      scrollHandler({ y }) {
         this.scrollY = -y
       },
-      back () {
-        this.$router.go(-1)
+      getBgColor() {
+        const result = analyze(this.playlist.coverImgUrl, { ignore: [ 'rgb(255,255,255)', 'rgb(0,0,0)' ] })
+        console.log(result)
+      },
+      back() {
+        this.$router.back()
       }
     }
   }
@@ -202,11 +215,25 @@
       top 45px
       background-color: $color-theme
 
+    .desc-bg
+      width: 100%
+      height: 220px
+      padding-top: 45px
+      position absolute
+      top 0
+      left 0
+      z-index 98
+
+    /*filter blur(1px)
+    transform scaleX(5)*/
+
     .song-lists-desc
       width: 100%
       height: 220px
       padding-top: 45px
       background-color: $color-theme
+      position relative
+      z-index 99
 
       .desc
         display flex
