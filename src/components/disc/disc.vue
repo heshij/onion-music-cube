@@ -1,30 +1,70 @@
 <template>
   <transition name="slide">
     <div class="disc-wrap">
-      <cube-sticky :pos="scrollY">
+      <div class="lists-title">
+        <div class="title-left">
+          <span class="cubeic-back" @click="back"></span>
+          <i>歌单</i>
+        </div>
+        <div class="title-right">
+          <span class="icon-search"></span>
+          <span class="icon-beckoning"></span>
+        </div>
+      </div>
+      <cube-sticky :pos="scrollY" :offset="45">
         <cube-scroll ref="scroll"
                      :data="songs"
                      :scroll-events="scrollEvents"
+                     :options="scrollOptions"
                      @scroll="scrollHandler">
           <div class="song-lists-desc">
-            <!--<div class="test" style="height: 20px;"></div>-->
-            <div class="lists-title">
-              <div class="title-left">
-                <span class="icon-upper"></span>
-                <i>歌单</i>
+            <div class="desc">
+              <div class="img-wrap">
+                <img v-lazy="playlist.coverImgUrl" alt="">
+                <span class="icon-play">{{playlist.playCount | setNum}}</span>
+                <i></i>
               </div>
-              <div class="title-right">
-                <span class="icon-search"></span>
-                <span class="icon-beckoning"></span>
+              <div class="songs-lists-txt">
+                <h2>{{playlist.name}}</h2>
+                <div class="author">
+                  <img v-lazy="creator.avatarUrl" alt="">
+                  <span class="name">{{creator.nickname}}</span>
+                  <span class="cubeic-arrow"></span>
+                </div>
+                <div class="author-desc">
+                  <p>{{playlist.description}}</p>
+                  <span class="cubeic-arrow"></span>
+                </div>
               </div>
+            </div>
+            <div class="menu">
+              <ul>
+                <li>
+                  <span class="iconpinglun"></span>
+                  <div class="txt">{{playlist.commentCount}}</div>
+                </li>
+                <li>
+                  <span class="cubeic-share"></span>
+                  <div class="txt">{{playlist.shareCount}}</div>
+                </li>
+                <li>
+                  <span class="cubeic-add"></span>
+                  <div class="txt">下载</div>
+                </li>
+                <li>
+                  <span class="cubeic-square-right"></span>
+                  <div class="txt">多选</div>
+                </li>
+              </ul>
             </div>
           </div>
           <cube-sticky-ele ele-key="2">
             <div class="sticky-header">
-              <div class="left"><span class="icon-play"></span>
+              <div class="left">
+                <span class="icon-play"></span>
                 <div class="play-all">播放全部 <i>(共{{songs.length}}首)</i></div>
               </div>
-              <div class="right"><span class="icon-play"></span>收藏({{subscribedCount | setNum}})</div>
+              <div class="right"><span class="icon-play"></span>收藏 ({{subscribedCount | setNum}})</div>
             </div>
           </cube-sticky-ele>
           <div class="songs-lists">
@@ -63,7 +103,12 @@
     data () {
       return {
         songs: [],
-        subscribedCount: 0,
+        playlist: {},
+        subscribedCount: 0, // 订阅数
+        creator: {}, // 作者信息
+        scrollOptions: {
+          // bounce: false
+        },
         scrollEvents: ['scroll'],
         scrollY: 0
       }
@@ -89,15 +134,21 @@
         let listsId = this.$route.params.id
         this.$api.find.getSongListsDetail(listsId).then((res) => {
           if (res.data.code === ERR_OK) {
+            this.playlist = res.data.playlist
             this.songs = res.data.playlist.tracks
             this.subscribedCount = res.data.playlist.subscribedCount
+            this.creator = res.data.playlist.creator
           }
           console.log('songs:', this.songs)
           console.log('playlist:', res.data.playlist)
+          console.log('creator:', res.data.playlist.creator)
         })
       },
       scrollHandler ({ y }) {
         this.scrollY = -y
+      },
+      back () {
+        this.$router.go(-1)
       }
     }
   }
@@ -121,18 +172,12 @@
     right 0
     background-color: $color-white
     font-size $font-size-medium
-  .cube-sticky
-    >>> .cube-sticky-fixed
-      top 45px
+    color $color-white
 
-    .song-lists-desc
-      width: 100%
-      height: 100px
-      background-color: $color-theme
     .lists-title
       display flex
       justify-content space-between
-      width 100%
+      /*width 100%*/
       height 45px
       line-height 45px
       padding 0 14px
@@ -141,15 +186,179 @@
       left 0
       right 0
       bottom 0
-    .sticky-header
-      display flex
-      justify-content space-between
-      padding 10px 14px
-      background-color $color-white
+      z-index 999
+      background-color $color-theme
+      font-size $font-size-large
 
-      .left
+      i
+        font-style normal
+        margin-left 12px
+
+      .icon-search
+        margin-right 24px
+
+  .cube-sticky
+    >>> .cube-sticky-fixed
+      top 45px
+      background-color: $color-theme
+
+    .song-lists-desc
+      width: 100%
+      height: 220px
+      padding-top: 45px
+      background-color: $color-theme
+
+      .desc
         display flex
         justify-content space-between
+        padding 0 14px
+
+        .img-wrap
+          position relative
+          width 124px
+          height 124px
+          overflow hidden
+          border-radius 6px
+
+          i
+            display block
+            width 100%
+            height 100%
+            position absolute
+            top 0
+            left 0
+            background-color $color-background-back-ss
+            z-index 99
+
+          span
+            position absolute
+            top 4px
+            right: 6px;
+            color $color-white
+            font-size $font-size-small
+            z-index 100
+
+          img
+            position absolute;
+            top 0
+            left 0
+            bottom 0
+            right 0
+            margin auto
+            width 100%
+            height 100%
+            max-width 100%
+            max-height 100%
+            object-fit cover
+
+        .songs-lists-txt
+          width 200px
+
+          h2
+            font-size $font-size-medium-x
+            color $color-white
+            line-height: 26px
+            font-weight bold
+
+          .author
+            display flex
+            justify-content flex-start
+            padding 4px 0 8px 0
+
+            span
+              font-size $font-size-small-s
+              color $color-white
+              line-height 28px
+
+            .name
+              display block
+              width 125px
+              no-wrap()
+
+          .author-desc
+            display flex
+            justify-content space-between
+            align-items center
+            font-size $font-size-small-s
+            color $color-theme-d
+
+            p
+              width 136px
+              line-height 20px
+              two-line()
+
+          img
+            width 28px
+            height 28px
+            border-radius 50%
+            margin-right: 6px
+
+    >>> .cube-sticky-ele
+      background-color: $color-theme
+
+    >>> .cube-sticky-content
+      border-top-left-radius 16px
+      border-top-right-radius 16px
+      overflow hidden
+
+      .sticky-header
+        display flex
+        justify-content space-between
+        padding 10px 14px
+        background-color $color-white
+
+        .left
+          display flex
+          justify-content space-between
+          line-height 36px
+          font-size $font-size-medium-x
+          color $color-title
+
+          > span
+            display block
+            width 24px
+            text-align center
+            line-height 36px
+
+          .play-all
+            padding 0 10px
+
+            i
+              font-style normal
+              font-size $font-size-medium
+              color $color-title-s
+
+        .right
+          width 104px
+          height 36px
+          line-height 36px
+          text-align center
+          border-radius 18px
+          background-color $color-theme
+          color $color-white
+
+          span
+            margin-right 4px
+
+    .menu
+      padding 24px 0
+
+      ul
+        display flex
+        align-items center
+        justify-content center
+        color $color-white
+
+        li
+          flex 1
+          text-align center
+
+          span
+            font-size $font-size-large-x
+
+          .txt
+            font-size $font-size-medium
+            padding: 6px 0;
 
     .songs-lists
       /*overflow: hidden*/
@@ -193,14 +402,14 @@
             color $color-title-s
             line-height 42px
 
-    .loading-container
-      position absolute
-      width: 22%
-      top 50%
-      left 50%
-      margin-left -11%
-      transform translateY(-50%)
-      background-color $color-theme
-      padding 6px 0
-      border-radius 4px
+  .loading-container
+    position absolute
+    width: 22%
+    top 80%
+    left 50%
+    margin-left -11%
+    transform translateY(-80%)
+    background-color $color-theme
+    padding 6px 0
+    border-radius 4px
 </style>

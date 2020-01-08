@@ -13,6 +13,8 @@ import './register' // 导入组件
 
 Vue.prototype.$api = api // 将api挂载到vue的原型上
 
+Vue.config.devtools = true
+
 Vue.use(VueLazyLoad, {
   loading: require('./common/images/default.jpg')
 })
