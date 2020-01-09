@@ -1,7 +1,7 @@
 <template>
   <transition name="slide">
     <div class="disc-wrap">
-      <div class="lists-title">
+      <div class="lists-title" ref="header">
         <div class="title-left">
           <span class="cubeic-back" @click="back"></span>
           <i>歌单</i>
@@ -17,7 +17,7 @@
                      :scroll-events="scrollEvents"
                      :options="scrollOptions"
                      @scroll="scrollHandler">
-          <div class="song-lists-desc">
+          <div class="song-lists-desc" :style="bgColor">
             <div class="desc">
               <div class="img-wrap">
                 <img v-lazy="playlist.coverImgUrl" alt="">
@@ -58,14 +58,15 @@
               </ul>
             </div>
           </div>
-          <div class="desc-bg" :style="bgStyle"></div>
           <cube-sticky-ele ele-key="2">
-            <div class="sticky-header">
-              <div class="left">
-                <span class="icon-play"></span>
-                <div class="play-all">播放全部 <i>(共{{songs.length}}首)</i></div>
+            <div class="lists-header" :style="bgColor">
+              <div class="sticky-header">
+                <div class="left">
+                  <span class="icon-play"></span>
+                  <div class="play-all">播放全部 <i>(共{{songs.length}}首)</i></div>
+                </div>
+                <div class="right"><span class="icon-play"></span>收藏 ({{subscribedCount | setNum}})</div>
               </div>
-              <div class="right"><span class="icon-play"></span>收藏 ({{subscribedCount | setNum}})</div>
             </div>
           </cube-sticky-ele>
           <div class="songs-lists">
@@ -102,7 +103,7 @@
   export default {
     name: 'disc',
     components: { Loading },
-    data() {
+    data () {
       return {
         songs: [],
         playlist: {},
@@ -113,16 +114,17 @@
           // bounce: false
         },
         scrollEvents: ['scroll'],
-        scrollY: 0
+        scrollY: 0,
+        bgColors: []
       }
     },
     computed: {
-      bgStyle() {
-        return `background-image:url(${this.playlist.coverImgUrl})`
+      bgColor () {
+        return `background-image: linear-gradient(to bottom right, ${this.bgColors[0]}, ${this.bgColors[1]})`
       }
     },
     filters: {
-      setNum(val) {
+      setNum (val) {
         if (!val) {
           return ''
         }
@@ -134,11 +136,11 @@
         return val
       }
     },
-    created() {
+    created () {
       this._getInfo()
     },
     methods: {
-      _getInfo() {
+      _getInfo () {
         let listsId = this.$route.params.id
         this.$api.find.getSongListsDetail(listsId).then((res) => {
           if (res.data.code === ERR_OK) {
@@ -147,20 +149,30 @@
             this.subscribedCount = res.data.playlist.subscribedCount
             this.creator = res.data.playlist.creator
           }
+          this.getBgColor()
           console.log('songs:', this.songs)
           console.log('playlist:', res.data.playlist)
           console.log('creator:', res.data.playlist.creator)
-          this.getBgColor()
         })
       },
-      scrollHandler({ y }) {
+      scrollHandler ({ y }) {
         this.scrollY = -y
+        if (this.scrollY > 0) {
+          this.$refs.header.style = this.bgColor
+        }
       },
-      getBgColor() {
-        const result = analyze(this.playlist.coverImgUrl, { ignore: [ 'rgb(255,255,255)', 'rgb(0,0,0)' ] })
-        console.log(result)
+      async getBgColor () {
+        const result = await analyze(this.playlist.coverImgUrl, {
+          ignore: ['rgb(255,255,255)', 'rgb(0,0,0)'],
+          scale: 0.6
+        })
+        let bgColor = [result[0].color, result[1].color]
+        this.$nextTick(() => {
+          this.bgColors = bgColor
+          // console.log(this.bgColors)
+        })
       },
-      back() {
+      back () {
         this.$router.back()
       }
     }
@@ -200,7 +212,6 @@
       right 0
       bottom 0
       z-index 999
-      background-color $color-theme
       font-size $font-size-large
 
       i
@@ -223,15 +234,14 @@
       top 0
       left 0
       z-index 98
-
-    /*filter blur(1px)
-    transform scaleX(5)*/
+      filter blur(1px)
+      transform scaleX(5)
 
     .song-lists-desc
       width: 100%
       height: 220px
       padding-top: 45px
-      background-color: $color-theme
+      /*background-color: $color-theme*/
       position relative
       z-index 99
 
@@ -321,18 +331,15 @@
             margin-right: 6px
 
     >>> .cube-sticky-ele
-      background-color: $color-theme
-
     >>> .cube-sticky-content
-      border-top-left-radius 16px
-      border-top-right-radius 16px
-      overflow hidden
-
       .sticky-header
         display flex
         justify-content space-between
         padding 10px 14px
         background-color $color-white
+        border-top-left-radius 16px
+        border-top-right-radius 16px
+        overflow hidden
 
         .left
           display flex
