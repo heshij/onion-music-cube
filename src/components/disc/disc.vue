@@ -120,7 +120,8 @@
     },
     computed: {
       bgColor () {
-        return `background-image: linear-gradient(to bottom right, ${this.bgColors[0]}, ${this.bgColors[1]})`
+        // return `background-image: linear-gradient(to bottom right, ${this.bgColors[0]}, ${this.bgColors[1]})`
+        return `background-color: ${this.bgColors[0]}`
       }
     },
     filters: {
