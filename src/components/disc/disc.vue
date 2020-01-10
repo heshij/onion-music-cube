@@ -4,7 +4,7 @@
       <div class="lists-title" ref="header">
         <div class="title-left">
           <span class="cubeic-back" @click="back"></span>
-          <i>歌单</i>
+          <i ref="songsTitle">歌单</i>
         </div>
         <div class="title-right">
           <span class="icon-search"></span>
@@ -100,6 +100,7 @@
   import Loading from '../../base/loading/loading'
   import analyze from 'rgbaster'
 
+  const HEADER_HEIGHT = 45
   export default {
     name: 'disc',
     components: { Loading },
@@ -158,8 +159,19 @@
       },
       scrollHandler ({ y }) {
         this.scrollY = -y
-        if (this.scrollY > 0) {
+        let minScrollY = -HEADER_HEIGHT
+        let percent = Math.abs(y / minScrollY)
+        // 滑过顶部的高度开始变化
+        if (y < minScrollY) {
           this.$refs.header.style = this.bgColor
+          this.$refs.header.style.opacity = Math.min(1, (percent - 1) / 2)
+          this.$refs.songsTitle.innerHTML = this.playlist.name
+          this.$refs.songsTitle.style.fontSize = '14px'
+        } else {
+          this.$refs.header.backgroundColor = ''
+          this.$refs.header.style.opacity = 1
+          this.$refs.songsTitle.innerHTML = '歌单'
+          this.$refs.songsTitle.style.fontSize = 'unset'
         }
       },
       async getBgColor () {
