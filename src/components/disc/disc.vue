@@ -20,19 +20,19 @@
           <div class="song-lists-desc" :style="bgColor">
             <div class="desc">
               <div class="img-wrap">
-                <img v-lazy="playlist.coverImgUrl" alt="">
-                <span class="icon-play">{{playlist.playCount | setNum}}</span>
+                <img v-lazy="playlistS.coverImgUrl" alt="">
+                <span class="icon-play">{{playlistS.playCount | setNum}}</span>
                 <i></i>
               </div>
               <div class="songs-lists-txt">
-                <h2>{{playlist.name}}</h2>
+                <h2>{{playlistS.name}}</h2>
                 <div class="author">
                   <img v-lazy="creator.avatarUrl" alt="">
                   <span class="name">{{creator.nickname}}</span>
                   <span class="cubeic-arrow"></span>
                 </div>
                 <div class="author-desc">
-                  <p>{{playlist.description}}</p>
+                  <p>{{playlistS.description}}</p>
                   <span class="cubeic-arrow"></span>
                 </div>
               </div>
@@ -69,23 +69,7 @@
               </div>
             </div>
           </cube-sticky-ele>
-          <div class="songs-lists">
-            <ul>
-              <li v-for="(item, index) in songs" :key="item.id">
-                <span class="num">{{index+1}}</span>
-                <div class="txt">
-                  <h2>{{item.name}}</h2>
-                  <div class="from">
-                    <i></i>
-                    <i></i>
-                    <span>{{item.ar[0].name}} - {{item.al.name}}</span>
-                  </div>
-                </div>
-                <span class="icon-plays playMV"></span>
-                <span class="icon-play more"></span>
-              </li>
-            </ul>
-          </div>
+          <song-list :songs="songs" @select="selectItem"></song-list>
         </cube-scroll>
       </cube-sticky>
       <div v-show="!songs.length" class="loading-container">
@@ -99,15 +83,26 @@
   import { ERR_OK } from '../../api/config'
   import Loading from '../../base/loading/loading'
   import analyze from 'rgbaster'
+  import SongList from '../../base/song-list/song-list'
+  import { mapActions, mapGetters } from 'vuex'
 
   const HEADER_HEIGHT = 45
   export default {
     name: 'disc',
-    components: { Loading },
+    components: { SongList, Loading },
     data () {
       return {
         songs: [],
-        playlist: {},
+        song: [],
+        url: '',
+        lyric: '',
+        nowLyric: '',
+        nowLyricIndex: -1,
+        ruleLyric: [],
+        noLyric: false,
+        isShowAudioList: false,
+        noLyricText: '',
+        playlistS: {},
         subscribedCount: 0, // 订阅数
         creator: {}, // 作者信息
         scrollOptions: {
@@ -122,8 +117,12 @@
     computed: {
       bgColor () {
         // return `background-image: linear-gradient(to bottom right, ${this.bgColors[0]}, ${this.bgColors[1]})`
-        return `background-color: ${this.bgColors[0]}`
-      }
+        return `background-image: radial-gradient(${this.bgColors[0]}, ${this.bgColors[1]})`
+        // return `background-color: ${this.bgColors[0]}`
+      },
+      ...mapGetters([
+        'playlist'
+      ])
     },
     filters: {
       setNum (val) {
@@ -146,16 +145,95 @@
         let listsId = this.$route.params.id
         this.$api.find.getSongListsDetail(listsId).then((res) => {
           if (res.data.code === ERR_OK) {
-            this.playlist = res.data.playlist
+            this.playlistS = res.data.playlist
             this.songs = res.data.playlist.tracks
+            // this.song = this._getSongUrl(res.data.playlist.tracks.id)
             this.subscribedCount = res.data.playlist.subscribedCount
             this.creator = res.data.playlist.creator
           }
           this.getBgColor()
           console.log('songs:', this.songs)
-          console.log('playlist:', res.data.playlist)
+          console.log('playlistS:', res.data.playlist)
           console.log('creator:', res.data.playlist.creator)
+          console.log('song:', this.song)
         })
+      },
+      _getSongUrl (id) {
+        this.$api.find.getSongUrl(id).then((res) => {
+          const data = res.data
+          if (data.code === 200) {
+            this.url = data.data[0].url
+            console.log(data.data[0])
+          }
+        })
+      },
+      _checkSong (id) {
+        this.$api.find.checkSong(id).then((res) => {
+          const data = res.data
+          if (data.success) {
+            this._getSongUrl(id)
+          }
+        })
+      },
+      _getSongLyric (id) {
+        this.$api.find.getSongLyric(id).then((res) => {
+          const data = res.data
+          if (data.nolyric) {
+            // 当前歌曲没有歌词
+            this.ruleLyric = []
+            this.nowLyric = ''
+            this.noLyric = true
+            this.noLyricText = '纯音乐，请欣赏'
+            return
+          }
+          this.noLyric = false
+          this.lyric = data.lrc.lyric
+          if (!this.lyric.trim()) {
+            // 歌词为空
+            this.noLyricText = '暂时没有歌词'
+            this.ruleLyric = []
+            this.nowLyric = ''
+            this.noLyric = true
+            return
+          }
+          this.ruleLyric = this.createLrcArray(this.lyric)
+          console.log('ruleLyric:', this.ruleLyric)
+        })
+      },
+      /**
+       * 创建歌词数组
+       * 通过换行符分割字符串，形成数组，数组的每一项是一个对象，对象返回格式如下
+       * {time：， word：}
+       * @param {String} lrc 歌词字符串
+       */
+      createLrcArray (lrc) {
+        const parts = lrc.split('\n')
+        for (let index = 0; index < parts.length; index++) {
+          const element = parts[index]
+          parts[index] = this.changeToObject(element)
+        }
+        return parts
+      },
+      /**
+       * 根据一行歌词 转换为对象
+       * @param {string} str 一行歌词
+       */
+      changeToObject (str) {
+        const words = str.split(']')[1]
+        // 这个正则返回时间信息
+        const reg = /\w{0,}:\w{0,}.\w{0,}/g
+        let timeArray = reg.exec(str)
+        if (!timeArray) {
+          return
+        }
+        timeArray = timeArray[0].split(':')
+        const minute = parseInt(timeArray[0]) // 分钟数
+        const second = parseFloat(timeArray[1]) // 秒数
+        const time = minute * 60 + second
+        return {
+          time,
+          words
+        }
       },
       scrollHandler ({ y }) {
         this.scrollY = -y
@@ -165,17 +243,17 @@
         if (y < minScrollY) {
           this.$refs.header.style = this.bgColor
           this.$refs.header.style.opacity = Math.min(1, (percent - 1) / 2)
-          this.$refs.songsTitle.innerHTML = this.playlist.name
+          this.$refs.songsTitle.innerHTML = this.playlistS.name
           this.$refs.songsTitle.style.fontSize = '14px'
         } else {
-          this.$refs.header.backgroundColor = ''
+          this.$refs.header.style = ''
           this.$refs.header.style.opacity = 1
           this.$refs.songsTitle.innerHTML = '歌单'
           this.$refs.songsTitle.style.fontSize = 'unset'
         }
       },
       async getBgColor () {
-        const result = await analyze(this.playlist.coverImgUrl, {
+        const result = await analyze(this.playlistS.coverImgUrl, {
           ignore: ['rgb(255,255,255)', 'rgb(0,0,0)'],
           scale: 0.6
         })
@@ -187,7 +265,19 @@
       },
       back () {
         this.$router.back()
-      }
+      },
+      selectItem (item, index) {
+        this.selectPlay({
+          list: this.songs,
+          index
+        })
+        this._checkSong(item.id)
+        this._getSongLyric(item.id)
+        console.log(`select:${index}`, item.id)
+      },
+      ...mapActions([
+        'selectPlay'
+      ])
     }
   }
 </script>

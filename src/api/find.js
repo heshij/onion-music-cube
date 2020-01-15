@@ -10,6 +10,9 @@ const api = base.bd // 本地请求
 const slider = api + '/banner?type=1' // 请求发现页面轮播图
 const recSongList = api + '/top/playlist' // 推荐歌单，歌单广场
 const songListsDetail = api + '/playlist/detail' // 获取歌单详情
+const checkSong = api + '/check/music' // 查看歌曲是否可用
+const songUrl = api + '/song/url' // 获取歌曲url
+const songLyric = api + '/lyric' // 获取歌词
 
 const find = {
   /**
@@ -47,6 +50,45 @@ const find = {
       params: {
         id,
         s
+      }
+    })
+  },
+  /**
+   * 传入歌曲 id, 可获取音乐是否可用
+   * @param {*} id 歌曲 id
+   * @param {*} br 码率,默认设置了 999000 即最大码率,如果要 320k 则可设置为 320000,其他类推
+   */
+  checkSong (id, br) {
+    return axios.get(checkSong, {
+      params: {
+        id,
+        br
+      }
+    })
+  },
+  /**
+   *  使用歌单详情接口后 , 能得到的音乐的 id, 但不能得到的音乐 url
+   * 调用此接口 , 传入的音乐 id( 可多个 , 用逗号隔开 )
+   * 可以获取对应的音乐的 url( 不需要登录 )
+   * @param {*} id 音乐 id
+   * @param {*} br 码率,默认设置了 999000 即最大码率,如果要 320k 则可设置为 320000,其他类推
+   */
+  getSongUrl (id, br) {
+    return axios.get(songUrl, {
+      params: {
+        id,
+        br
+      }
+    })
+  },
+  /**
+   * 传入音乐 id 可获得对应音乐的歌词 ( 不需要登录 )
+   * @param {*} id 歌曲id
+   */
+  getSongLyric (id) {
+    return axios.get(songLyric, {
+      params: {
+        id
       }
     })
   }
